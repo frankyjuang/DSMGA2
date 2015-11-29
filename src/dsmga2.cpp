@@ -14,7 +14,7 @@
 #include "fastcounting.h"
 #include "statistics.h"
 
-#include "/usr/include/boost/math/distributions/chi_squared.hpp"
+#include <boost/math/distributions/chi_squared.hpp>
 
 
 using namespace std;

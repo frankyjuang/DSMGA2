@@ -93,6 +93,7 @@ c	nk-wa.h	/^    double **c;$/;"	m	struct:__anon1
 cache	chromosome.h	/^    static unordered_map<unsigned long, double> cache;$/;"	m	class:Chromosome
 cache	global.cpp	/^unordered_map<unsigned long, double> Chromosome::cache;$/;"	m	class:Chromosome	file:
 clau	sat.h	/^    int clau;$/;"	m	struct:SATinstance
+computeKAI	dsmga2.cpp	/^double DSMGA2::computeKAI(double a00, double a01, double a10, double a11) const {$/;"	f	class:DSMGA2
 computeMI	dsmga2.cpp	/^double DSMGA2::computeMI(double a00, double a01, double a10, double a11) const {$/;"	f	class:DSMGA2
 countOne	bitwisedistance.h	/^    int countOne(unsigned long bitString) {$/;"	f	class:BitwiseDistance
 countOne	dsmga2.cpp	/^int DSMGA2::countOne(int x) const {$/;"	f	class:DSMGA2
@@ -165,6 +166,7 @@ getVal	chromosome.h	/^    int getVal (int index) const {$/;"	f	class:Chromosome
 getVal	fastcounting.cpp	/^inline int FastCounting::getVal (int index) const {$/;"	f	class:FastCounting
 getVariance	statistics.h	/^    double getVariance () {$/;"	f	class:Statistics
 graph	dsmga2.h	/^    TriMatrix<double> graph;$/;"	m	class:DSMGA2
+graphKAI	dsmga2.h	/^    TriMatrix<double> graphKAI;$/;"	m	class:DSMGA2
 hasSeen	chromosome.cpp	/^bool Chromosome::hasSeen() const {$/;"	f	class:Chromosome
 head	doublelinkedlistarray.h	/^    int head;$/;"	m	class:DLLA
 hit	chromosome.h	/^    static bool hit;$/;"	m	class:Chromosome
