@@ -75,7 +75,6 @@ public:
     FastCounting* fastCounting;
 
     TriMatrix<double> graph;
-    TriMatrix<double> graphKAI;
 
     double previousFitnessMean;
     Statistics stFitness;
