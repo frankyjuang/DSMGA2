@@ -4,7 +4,7 @@
 #include <ctime>
 
 #define SIZE (1000)
-#define filename "zobristkey"
+#define filename "../../src/zobristkey"
 
 int main() {
 
