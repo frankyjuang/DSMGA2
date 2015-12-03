@@ -75,14 +75,12 @@ public:
     FastCounting* fastCounting;
 
     TriMatrix<double> graph;
-    TriMatrix<double> graphKAI;
 
     double previousFitnessMean;
     Statistics stFitness;
 
     // methods
-    double computeMI(double, double, double, double) const;
-    double computeKAI(double, double, double, double) const;
+    double computeSimple(double, double, double, double) const;
 
 
     void findClique(int startNode, list<int>& result);

@@ -1,8 +1,9 @@
 CXX = g++
 #CXXFLAGS = -O0 -g -std=c++11
-CXXFLAGS = -O2 -Wall -march=native -std=c++11
+CXXFLAGS = -O2 -Wall -march=native -std=c++11 $(INCLUDE)
 INCLUDE = -I/home/student1/local/include/
 TLIB = -lm 
+DIR = ../bin/simple/
 
 #-----Suffix Rules---------------------------
 # set up C++ suffixes and relationship between .cc and .o files
@@ -34,13 +35,13 @@ OBJ3 = $(addsuffix .o, $(basename $(SRC3)))
 all: DSMGA2 sweep genZobrist
 
 DSMGA2: $(OBJ1)
-	$(CXX) $(CXXFLAGS) $(INCLUDE) $(TLIB) -o ../bin/$@ $(OBJ1)
+	$(CXX) $(CXXFLAGS) $(INCLUDE) $(TLIB) -o $(DIR)$@ $(OBJ1)
 
 sweep: $(OBJ2) DSMGA2
-	$(CXX) $(CXXFLAGS) $(INCLUDE) $(TLIB) -o ../bin/$@ $(OBJ2)
+	$(CXX) $(CXXFLAGS) $(INCLUDE) $(TLIB) -o $(DIR)$@ $(OBJ2)
 
 genZobrist: $(OBJ3)
-	$(CXX) $(CXXFLAGS) $(INCLUDE) $(TLIB) -o ../bin/$@ $(OBJ3)
+	$(CXX) $(CXXFLAGS) $(INCLUDE) $(TLIB) -o $(DIR)$@ $(OBJ3)
 
 #-----Other stuff----------------------------
 depend:
