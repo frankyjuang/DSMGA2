@@ -77,14 +77,14 @@ int main (int argc, char *argv[]) {
 
     if (fffff == 5) {
 	char filename[200];
-        sprintf(filename, "./SPIN/%d/%d_%d",ell, ell, problemNum);
+        sprintf(filename, "../../src/SPIN/%d/%d_%d",ell, ell, problemNum);
         if (SHOW_BISECTION) printf("Loading: %s\n", filename);
         loadSPIN(filename, &mySpinGlassParams);
     }
 
     if (fffff == 4) {
         char filename[200];
-        sprintf(filename, "./NK_Instance/pnk%d_%d_%d_%d", ell, neighborNum, stepNum, problemNum);
+        sprintf(filename, "../../src/NK_Instance/pnk%d_%d_%d_%d", ell, neighborNum, stepNum, problemNum);
         if (SHOW_BISECTION) printf("Loading: %s\n", filename);
         FILE *fp = fopen(filename, "r");
         loadNKWAProblem(fp, &nkwa);
@@ -93,7 +93,7 @@ int main (int argc, char *argv[]) {
 
     if (fffff == 6) {
         char filename[200];
-        sprintf(filename, "./SAT/uf%d/uf%d-0%d.cnf",ell,ell,problemNum);
+        sprintf(filename, "../../src/SAT/uf%d/uf%d-0%d.cnf",ell,ell,problemNum);
         if (SHOW_BISECTION) printf("Loading: %s\n", filename);
         loadSAT(filename, &mySAT);
     }
