@@ -11,7 +11,7 @@ class ZKey {
 
 public:
     ZKey() {
-        FILE *fp = fopen("zobristkey", "rb");
+        FILE *fp = fopen("../../src/zobristkey", "rb");
         fread(keys, sizeof(unsigned long), 1000, fp);
         fclose(fp);
     }
