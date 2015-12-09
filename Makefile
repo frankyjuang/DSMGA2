@@ -1,9 +1,9 @@
 CXX = g++
-#CXXFLAGS = -O0 -g -std=c++11
+#CXXFLAGS = -O0 -g -std=c++11 $(INCLUDE)
 CXXFLAGS = -O2 -Wall -march=native -std=c++11 $(INCLUDE)
 INCLUDE = -I/home/student1/local/include/
 TLIB = -lm 
-DIR = ../bin/master/
+DIR = ../bin/optBM/
 
 #-----Suffix Rules---------------------------
 # set up C++ suffixes and relationship between .cc and .o files

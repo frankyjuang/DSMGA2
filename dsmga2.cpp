@@ -9,6 +9,7 @@
 #include <iterator>
 
 #include <iostream>
+#include <map>
 #include "chromosome.h"
 #include "dsmga2.h"
 #include "fastcounting.h"
@@ -245,12 +246,62 @@ void DSMGA2::restrictedMixing(Chromosome& ch) {
 
         genOrderN();
 
-        for (int i=0; i<nCurrent; ++i) {
+        // stat mask segment 
+        map<vector<char>, int*> segmap;
+        vector<char> segment;
+        segment.reserve(mask.size());
+        Chromosome* temp_population = new Chromosome[nCurrent];
+        bool* check = new bool[nCurrent];
 
-            if (EQ)
-                backMixingE(ch, mask, population[orderN[i]]);
-            else
-                backMixing(ch, mask, population[orderN[i]]);
+        for (int i = 0; i < nCurrent; ++i) {
+            temp_population[orderN[i]] = population[orderN[i]];
+            segment.clear();
+            for (list<int>::iterator it = mask.begin(); it != mask.end(); ++it) {
+                temp_population[orderN[i]].setVal(*it, ch.getVal(*it));
+                if (population[orderN[i]].getVal(*it) == 1)
+                    segment.push_back('1');
+                else
+                    segment.push_back('0');
+            }
+            if (segmap.find(segment) == segmap.end()) {
+                int* counts = new int[2];
+                counts[0] = 1;
+                counts[1] = 0;
+                segmap.insert(pair<vector<char>, int*>(segment, counts));
+                //cout << "New Segment: " << string(segment.begin(), segment.end()) << endl;
+            } else {
+                ++segmap[segment][0];
+            }
+
+            if (temp_population[orderN[i]].getFitness() > population[orderN[i]].getFitness()) {
+                ++segmap[segment][1];
+                check[orderN[i]] = true;
+            } else {
+                check[orderN[i]] = false;
+            }
+        }
+
+        genOrderN();
+
+        for (int i=0; i<nCurrent; ++i) {
+            segment.clear();
+            for (list<int>::iterator it = mask.begin(); it != mask.end(); ++it) {
+                if (population[orderN[i]].getVal(*it) == 1)
+                    segment.push_back('1');
+                else
+                    segment.push_back('0');
+            }
+            int* cnt = segmap[segment];
+            if (cnt[0] == cnt[1] && cnt[0] < 2) {
+                //cout << "Skip BM!!!\t"<< cnt[0] << endl;
+                //cout << "!";
+                continue;
+            }
+            if (check[orderN[i]]) {
+                pHash.erase(population[orderN[i]].getKey());
+                pHash[temp_population[orderN[i]].getKey()] = temp_population[orderN[i]].getFitness();
+                population[orderN[i]] = temp_population[orderN[i]];
+            }
         }
     }
 
