@@ -38,7 +38,6 @@ DSMGA2::DSMGA2 (int n_ell, int n_nInitial, int n_maxGen, int n_maxFe, int fffff)
     maxFe = n_maxFe;
 
     graph.init(ell);
-    graphKAI.init(ell);
 
     bestIndex = -1;
     masks = new list<int>[ell];
@@ -395,17 +394,6 @@ void DSMGA2::mixing() {
     // ================================================
     for (int i=0; i<ell; ++i) {
         findClique(i, masks[i]);        // generate connection priority for each bit
-        
-        //list<int>::iterator it = masks[i].begin();
-        //double mi1 = graph(i, *(++it));
-        //double kai1 = graphKAI(i, *it);
-        //double mi2 = graph(i, *(++it));
-        //double kai2 = graphKAI(i, *it);
-        //if (kai2 > kai1 && (mi1 > 0.1 || kai2 > 0.1)) {
-            ////cout << "WTF!!!!!!!!" << endl;
-            //cout << "MI1 = " << mi1 << "\tMI2 = " << mi2 << endl;
-            //cout << "KAI1 = " << kai1 << "\tKAI2 = " << kai2 << endl;
-        //}
     }
 
     int repeat = (ell>50)? ell/50: 1;
@@ -461,11 +449,8 @@ void DSMGA2::buildGraph() {
             double p10 = (double)n10/(double)nCurrent;
             double p11 = (double)n11/(double)nCurrent;
 
-            double linkage = computeMI(p00,p01,p10,p11);
-            //double linkage = computeKAI(p00,p01,p10,p11);
-            //double linkageKAI = computeKAI(p00,p01,p10,p11);
+            double linkage = computeKAI(p00,p01,p10,p11);
             graph.write(i,j,linkage);
-            //graphKAI.write(i,j,linkageKAI);
         }
     }
 
@@ -515,58 +500,6 @@ void DSMGA2::findClique(int startNode, list<int>& result) {
 
     delete []connection;
 
-}
-
-double DSMGA2::computeMI(double a00, double a01, double a10, double a11) const {
-
-    double p0 = a00 + a01;
-    double q0 = a00 + a10;
-    double p1 = 1-p0;
-    double q1 = 1-q0;
-
-    double join = 0.0;
-    if (a00 > EPSILON)
-        join += a00*log(a00);
-    if (a01 > EPSILON)
-        join += a01*log(a01);
-    if (a10 > EPSILON)
-        join += a10*log(a10);
-    if (a11 > EPSILON)
-        join += a11*log(a11);
-
-    double p = 0.0;
-    if (p0 > EPSILON)
-        p += p0*log(p0);
-    if (p1 > EPSILON)
-        p += p1*log(p1);
-
-
-    double q = 0.0;
-    if (q0 > EPSILON)
-        q += q0*log(q0);
-    if (q1 > EPSILON)
-        q += q1*log(q1);
-
-    double mi = -p-q+join;
-    //double kai = computeKAI(a00,a01,a10,a11);
-
-    /*
-    if (kai < 0.02) {
-        //cout << ".";
-        if (mi - 0.01 > kai) {
-            //cout << "!";
-            cout << "KAI = " << kai << endl;
-            cout << "MI = " << mi << endl;
-            cout << a00 << endl;
-            cout << a01 << endl;
-            cout << a10 << endl;
-            cout << a11 << endl;
-            exit(0);
-        }
-        return 0;
-    }
-    */
-    return mi;
 }
 
 double DSMGA2::computeKAI(double a00, double a01, double a10, double a11) const {
