@@ -282,6 +282,9 @@ void DSMGA2::restrictedMixing(Chromosome& ch) {
         }
 
         genOrderN();
+        
+        double prob = 1 / pow(2, mask.size() - 1); 
+        double threshold = nCurrent * (prob + 0 * sqrt(prob * (1 - prob)));
 
         for (int i=0; i<nCurrent; ++i) {
             segment.clear();
@@ -292,7 +295,8 @@ void DSMGA2::restrictedMixing(Chromosome& ch) {
                     segment.push_back('0');
             }
             int* cnt = segmap[segment];
-            if (cnt[0] == cnt[1] && cnt[0] < 2) {
+
+            if (cnt[0] == cnt[1] && cnt[0] < threshold && mask.size() > 1) {
                 //cout << "Skip BM!!!\t"<< cnt[0] << endl;
                 //cout << "!";
                 continue;
