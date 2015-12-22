@@ -225,12 +225,15 @@ int DSMGA2::countAND3(int x, int y, int z) const {
 
     int n = 0;
 
-    for (int i=0; i<fastCounting[0].lengthLong; ++i) {
+    for (int i = 0; i < fastCounting[0].lengthLong; ++i) {
         unsigned long val = 0;
 
         val = fastCounting[x].gene[i];
+        cout << val << endl;
         val &= fastCounting[y].gene[i];
+        cout << val << endl;
         val &= fastCounting[z].gene[i];
+        cout << val << endl;
 
         n += myBD.countOne(val);
     }
@@ -444,7 +447,9 @@ inline void DSMGA2::genOrderELL() {
 void DSMGA2::buildGraph() {
 
     int *one = new int [ell];
-    for (int i=0; i<ell; ++i) {
+    char* key = new char[10];
+
+    for (int i = 0; i < ell; ++i) {
         one[i] = countOne(i);
     }
 
@@ -455,7 +460,7 @@ void DSMGA2::buildGraph() {
             int n00x, n01x, n10x, n11x;
             int nijX = countXOR(i, j);
 
-            n11x = (one[i]+one[j]-nijX)/2;
+            n11x = (one[i] + one[j] - nijX) / 2;
             n10x = one[i] - n11x;
             n01x = one[j] - n11x;
             n00x = nCurrent - n01x - n10x - n11x;
@@ -485,19 +490,22 @@ void DSMGA2::buildGraph() {
                 n001 = one[k] - n1x1 - n011;
                 n000 = n00x - n001;
 
+                if (n000 + n001 + n010 + n011 + n100 + n101 + n110 + n111 != nCurrent)
+                    cout << "Total Sum Error!" << endl;
+
                 vector<double> p(8);
-                p[0] = (double)n000/(double)nCurrent;
-                p[1] = (double)n001/(double)nCurrent;
-                p[2] = (double)n010/(double)nCurrent;
-                p[3] = (double)n011/(double)nCurrent;
-                p[4] = (double)n100/(double)nCurrent;
-                p[5] = (double)n101/(double)nCurrent;
-                p[6] = (double)n110/(double)nCurrent;
-                p[7] = (double)n111/(double)nCurrent;
+                p[0] = 1.0 * n000 / nCurrent;
+                p[1] = 1.0 * n001 / nCurrent;
+                p[2] = 1.0 * n010 / nCurrent;
+                p[3] = 1.0 * n011 / nCurrent;
+                p[4] = 1.0 * n100 / nCurrent;
+                p[5] = 1.0 * n101 / nCurrent;
+                p[6] = 1.0 * n110 / nCurrent;
+                p[7] = 1.0 * n111 / nCurrent;
                 double linkage3 = compute_three_mi_predict(p);
-                char* key = new char[10];
+
                 sprintf(key, "%03d%03d%03d", i, j, k);
-                cout << key << endl;
+                //cout << key << endl;
                 threeMI[key] = linkage3;
             }
         }
@@ -505,7 +513,7 @@ void DSMGA2::buildGraph() {
 
 
     delete []one;
-
+    delete [] key;
 }
 
 // from 1 to ell, pick by max edge
@@ -565,11 +573,15 @@ void DSMGA2::findClique(int startNode, list<int>& result) {
                 }
             }
 
+            cout << "ThreeMI Index: " << index << endl;
+            cout << "AddMI Index: " << temp_index << endl;
+
             if (index != temp_index) {
                 cout << "ThreeMI!" << endl;
             }
 
             third_pushed = true;
+            delete [] key;
         } else {
             for (DLLA::iterator iter = rest.begin(); iter != rest.end(); ++iter) {
                 if (max < connection[*iter]) {
@@ -709,8 +721,10 @@ double DSMGA2::compute_three_mi_predict(vector<double> p) {
             cout << "high error in index " << i << endl;
             ppp = true;
         }
-        if (low[i] > p[i])
+        if (low[i] > p[i]) {
             cout << "low error in index " << i << endl;
+            ppp = true;
+        }
         predict[i] = (high[i] + low[i]) / 2;
     }
     if (ppp)

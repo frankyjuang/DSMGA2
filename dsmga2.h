@@ -90,7 +90,7 @@ public:
     void findClique(int startNode, list<int>& result);
 
     void buildFastCounting();
-    int countAND3(int x, int y, int z) const;
+    int countAND3(int, int, int) const;
     int countXOR(int, int) const;
     int countOne(int) const;
 
