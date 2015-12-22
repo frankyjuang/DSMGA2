@@ -75,18 +75,22 @@ public:
     FastCounting* fastCounting;
 
     TriMatrix<double> graph;
+    unordered_map<char*, double> threeMI;
 
     double previousFitnessMean;
     Statistics stFitness;
 
     // methods
     double computeMI(double, double, double, double) const;
-    double computeKAI(double, double, double, double) const;
-
-
+    void reduce_p3(vector<double>, vector<double>&, vector<double>&);
+    double compute_h(vector<double>);
+    double compute_three_mi(vector<double>);
+    double compute_three_mi_predict(vector<double>);
+    
     void findClique(int startNode, list<int>& result);
 
     void buildFastCounting();
+    int countAND3(int x, int y, int z) const;
     int countXOR(int, int) const;
     int countOne(int) const;
 

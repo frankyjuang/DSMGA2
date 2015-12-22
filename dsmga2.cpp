@@ -9,12 +9,11 @@
 #include <iterator>
 
 #include <iostream>
+#include <cstdio>
 #include "chromosome.h"
 #include "dsmga2.h"
 #include "fastcounting.h"
 #include "statistics.h"
-
-#include <boost/math/distributions/chi_squared.hpp>
 
 
 using namespace std;
@@ -215,6 +214,23 @@ int DSMGA2::countXOR(int x, int y) const {
         val = fastCounting[x].gene[i];
 
         val ^= fastCounting[y].gene[i];
+
+        n += myBD.countOne(val);
+    }
+
+    return n;
+}
+
+int DSMGA2::countAND3(int x, int y, int z) const {
+
+    int n = 0;
+
+    for (int i=0; i<fastCounting[0].lengthLong; ++i) {
+        unsigned long val = 0;
+
+        val = fastCounting[x].gene[i];
+        val &= fastCounting[y].gene[i];
+        val &= fastCounting[z].gene[i];
 
         n += myBD.countOne(val);
     }
@@ -436,21 +452,54 @@ void DSMGA2::buildGraph() {
 
         for (int j=i+1; j<ell; ++j) {
 
-            int n00, n01, n10, n11;
-            int nX =  countXOR(i, j);
+            int n00x, n01x, n10x, n11x;
+            int nijX = countXOR(i, j);
 
-            n11 = (one[i]+one[j]-nX)/2;
-            n10 = one[i] - n11;
-            n01 = one[j] - n11;
-            n00 = nCurrent - n01 - n10 - n11;
+            n11x = (one[i]+one[j]-nijX)/2;
+            n10x = one[i] - n11x;
+            n01x = one[j] - n11x;
+            n00x = nCurrent - n01x - n10x - n11x;
 
-            double p00 = (double)n00/(double)nCurrent;
-            double p01 = (double)n01/(double)nCurrent;
-            double p10 = (double)n10/(double)nCurrent;
-            double p11 = (double)n11/(double)nCurrent;
+            double p00x = (double)n00x/(double)nCurrent;
+            double p01x = (double)n01x/(double)nCurrent;
+            double p10x = (double)n10x/(double)nCurrent;
+            double p11x = (double)n11x/(double)nCurrent;
 
-            double linkage = computeMI(p00,p01,p10,p11);
-            graph.write(i,j,linkage);
+            double linkage2 = computeMI(p00x,p01x,p10x,p11x);
+            graph.write(i,j,linkage2);
+
+            for (int k = j + 1; k < ell; ++k) {
+                int n1x1, nx11;
+                int nikX = countXOR(i, k);
+                int njkX = countXOR(j, k);
+                n1x1 = (one[i] + one[k] - nikX) / 2;
+                nx11 = (one[j] + one[k] - njkX) / 2;
+
+                int n000, n001, n010, n011, n100, n101, n110, n111;
+                n111 = countAND3(i, j, k);
+                n110 = n11x - n111;
+                n101 = n1x1 - n111;
+                n011 = nx11 - n111;
+                n100 = n10x - n101;
+                n010 = n01x - n011;
+                n001 = one[k] - n1x1 - n011;
+                n000 = n00x - n001;
+
+                vector<double> p(8);
+                p[0] = (double)n000/(double)nCurrent;
+                p[1] = (double)n001/(double)nCurrent;
+                p[2] = (double)n010/(double)nCurrent;
+                p[3] = (double)n011/(double)nCurrent;
+                p[4] = (double)n100/(double)nCurrent;
+                p[5] = (double)n101/(double)nCurrent;
+                p[6] = (double)n110/(double)nCurrent;
+                p[7] = (double)n111/(double)nCurrent;
+                double linkage3 = compute_three_mi_predict(p);
+                char* key = new char[10];
+                sprintf(key, "%03d%03d%03d", i, j, k);
+                cout << key << endl;
+                threeMI[key] = linkage3;
+            }
         }
     }
 
@@ -479,15 +528,56 @@ void DSMGA2::findClique(int startNode, list<int>& result) {
     for (DLLA::iterator iter = rest.begin(); iter != rest.end(); ++iter)
         connection[*iter] = graph(startNode, *iter);
 
+    bool second_pushed = false;    // pushed second element into result
+    bool third_pushed = false;
     while (!rest.isEmpty()) {
-
         double max = -INF;
         int index = -1;
-        for (DLLA::iterator iter = rest.begin(); iter != rest.end(); ++iter) {
-            if (max < connection[*iter]) {
-                max = connection[*iter];
-                index = *iter;
+
+        if (second_pushed && !third_pushed) {
+            char* key = new char[10];
+            int first, second;
+            double temp_max = -INF;
+            int temp_index = -1;
+
+            if (result.front() < result.back()) {
+                first = result.front();
+                second = result.back();
+            } else {
+                first = result.back();
+                second = result.front();
             }
+
+            for (DLLA::iterator iter = rest.begin(); iter != rest.end(); ++iter) {
+                if (*iter < first)
+                    sprintf(key, "%03d%03d%03d", *iter, first, second);
+                else if (*iter > first && *iter < second)
+                    sprintf(key, "%03d%03d%03d", first, *iter, second);
+                else
+                    sprintf(key, "%03d%03d%03d", first, second, *iter);
+                if (max < threeMI[key]) {
+                    max = threeMI[key];
+                    index = *iter;
+                }
+                if (temp_max < connection[*iter]) {
+                    temp_max = connection[*iter];
+                    temp_index = *iter;
+                }
+            }
+
+            if (index != temp_index) {
+                cout << "ThreeMI!" << endl;
+            }
+
+            third_pushed = true;
+        } else {
+            for (DLLA::iterator iter = rest.begin(); iter != rest.end(); ++iter) {
+                if (max < connection[*iter]) {
+                    max = connection[*iter];
+                    index = *iter;
+                }
+            }
+            second_pushed = true;
         }
 
         rest.erase(index);
@@ -535,6 +625,99 @@ double DSMGA2::computeMI(double a00, double a01, double a10, double a11) const {
     double mi = -p-q+join;
 
     return mi;
+}
+
+void DSMGA2::reduce_p3(vector<double> p, vector<double>& p1, vector<double>& p2) {
+    if ((p1.size() != 6) || (p2.size() != 12))
+        cout << "length error in reduce_p3!" << endl;
+    p2[0]  = p[0] + p[1];
+    p2[1]  = p[2] + p[4];
+    p2[2]  = p[3] + p[6];
+    p2[3]  = p[4] + p[8];
+    p2[4]  = p[0] + p[2];
+    p2[5]  = p[1] + p[4];
+    p2[6]  = p[3] + p[5];
+    p2[7]  = p[6] + p[7];
+    p2[8]  = p[0] + p[3];
+    p2[9]  = p[1] + p[6];
+    p2[10] = p[2] + p[5];
+    p2[11] = p[4] + p[7];
+    p1[0] = p2[0] + p2[1];
+    p1[2] = p2[0] + p2[2];
+    p1[4] = p2[4] + p2[6];
+    for (int i = 1; i < 6; i += 2)
+        p1[i] = 1 - p1[i - 1]; 
+}
+
+double DSMGA2::compute_h(vector<double> p) {
+    double ans = 0.0;
+    for (size_t i = 0; i < p.size(); ++i) {
+        if (p[i] > EPSILON)
+            ans -= p[i] * log(p[i]);
+    }
+    return ans;
+}
+
+double DSMGA2::compute_three_mi(vector<double> p) {
+    if (p.size() != 8)
+        cout << "The length of input in compute_three_mi is not 8!" << endl;
+    vector<double> p2(12);
+    vector<double> p1(6);
+    reduce_p3(p, p1, p2);
+    return compute_h(p1) - compute_h(p2) + compute_h(p);
+}
+
+double DSMGA2::compute_three_mi_predict(vector<double> p) {
+    vector<double> p2(12);      // probability of 00~11 of bit 12, 13, 23
+    vector<double> p1(6);       // probability of bit 1, 2, 3 to be 0 or 1
+    vector<double> high(8);     // upper bound
+    vector<double> low(8);      // lower bound
+    vector<double> predict(8);  // prediction based on upper and lower bound
+    vector<double> candi(8);    // candidate
+
+    reduce_p3(p, p1, p2);       // compute p1, p2 given p3
+
+    candi[0] = 1 - p1[1] - p1[3] - p1[5] + p2[3] + p2[7] + p2[11];
+    high[0] = min(min(min(p2[0], p2[4]), p2[8]), candi[0]);
+    candi[1] = 1 - p1[1] - p1[3] - p1[4] + p2[3] + p2[6] + p2[10];
+    high[1] = min(min(min(p2[0], p2[5]), p2[9]), candi[1]);
+    candi[2] = 1 - p1[1] - p1[2] - p1[5] + p2[2] + p2[7] + p2[9];
+    high[2] = min(min(min(p2[1], p2[4]), p2[10]), candi[2]);
+    candi[3] = 1 - p1[1] - p1[2] - p1[4] + p2[2] + p2[6] + p2[8];
+    high[3] = min(min(min(p2[1], p2[5]), p2[11]), candi[3]);
+    candi[4] = 1 - p1[0] - p1[3] - p1[5] + p2[1] + p2[5] + p2[11];
+    high[4] = min(min(min(p2[2], p2[6]), p2[8]), candi[4]);
+    candi[5] = 1 - p1[0] - p1[3] - p1[4] + p2[1] + p2[4] + p2[10];
+    high[5] = min(min(min(p2[2], p2[7]), p2[9]), candi[5]);
+    candi[6] = 1 - p1[0] - p1[2] - p1[5] + p2[0] + p2[5] + p2[9];
+    high[6] = min(min(min(p2[3], p2[6]), p2[10]), candi[6]);
+    candi[7] = 1 - p1[0] - p1[2] - p1[4] + p2[0] + p2[4] + p2[8];
+    high[7] = min(min(min(p2[3], p2[7]), p2[11]), candi[7]);
+
+    low[0] = max(max(p2[0] - high[1] , p2[4] - high[2]) , p2[8] - high[4]);  //000
+    low[1] = max(max(p2[0] - high[0] , p2[5] - high[3]) , p2[9] - high[5]);  //001
+    low[2] = max(max(p2[1] - high[3] , p2[4] - high[0]) , p2[10] - high[6]); //010
+    low[3] = max(max(p2[1] - high[2] , p2[5] - high[1]) , p2[11] - high[7]); //011
+    low[4] = max(max(p2[2] - high[5] , p2[6] - high[6]) , p2[8] - high[0]);  //100
+    low[5] = max(max(p2[2] - high[4] , p2[7] - high[7]) , p2[9] - high[1]);  //101
+    low[6] = max(max(p2[3] - high[7] , p2[6] - high[4]) , p2[10] - high[2]); //110
+    low[7] = max(max(p2[3] - high[6] , p2[7] - high[5]) , p2[11] - high[3]); //111
+
+    bool ppp = false;
+    for (int i = 0; i < 8; ++i) {
+        if (high[i] < p[i]) {
+            cout << "high error in index " << i << endl;
+            ppp = true;
+        }
+        if (low[i] > p[i])
+            cout << "low error in index " << i << endl;
+        predict[i] = (high[i] + low[i]) / 2;
+    }
+    if (ppp)
+        for (int j = 0; j < 8; ++j)
+            cout << p[j] << endl;
+
+    return compute_three_mi(predict);     
 }
 
 void DSMGA2::selection () {
