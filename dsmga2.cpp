@@ -229,11 +229,8 @@ int DSMGA2::countAND3(int x, int y, int z) const {
         unsigned long val = 0;
 
         val = fastCounting[x].gene[i];
-        cout << val << endl;
         val &= fastCounting[y].gene[i];
-        cout << val << endl;
         val &= fastCounting[z].gene[i];
-        cout << val << endl;
 
         n += myBD.countOne(val);
     }
@@ -447,7 +444,6 @@ inline void DSMGA2::genOrderELL() {
 void DSMGA2::buildGraph() {
 
     int *one = new int [ell];
-    char* key = new char[10];
 
     for (int i = 0; i < ell; ++i) {
         one[i] = countOne(i);
@@ -502,18 +498,16 @@ void DSMGA2::buildGraph() {
                 p[5] = 1.0 * n101 / nCurrent;
                 p[6] = 1.0 * n110 / nCurrent;
                 p[7] = 1.0 * n111 / nCurrent;
-                double linkage3 = compute_three_mi_predict(p);
-
-                sprintf(key, "%03d%03d%03d", i, j, k);
+                //double linkage3 = compute_three_mi_predict(p);
+                double linkage3 = compute_three_mi(p);
+                string key = to_string(i) + to_string(j) + to_string(k);
                 //cout << key << endl;
-                threeMI[key] = linkage3;
+                predictMI3[key] = linkage3;
             }
         }
     }
 
-
     delete []one;
-    delete [] key;
 }
 
 // from 1 to ell, pick by max edge
@@ -524,8 +518,8 @@ void DSMGA2::findClique(int startNode, list<int>& result) {
 
     DLLA rest(ell);         // why using DOUBLE link list instead of linked list or just vector
     genOrderELL();
-    for (int i=0; i<ell; ++i) {
-        if (orderELL[i]==startNode)
+    for (int i = 0; i < ell; ++i) {
+        if (orderELL[i] == startNode)
             result.push_back(orderELL[i]);
         else
             rest.insert(orderELL[i]);
@@ -537,13 +531,13 @@ void DSMGA2::findClique(int startNode, list<int>& result) {
         connection[*iter] = graph(startNode, *iter);
 
     bool second_pushed = false;    // pushed second element into result
-    bool third_pushed = false;
+    bool third_pushed = false;     // pushed third element into result
     while (!rest.isEmpty()) {
         double max = -INF;
         int index = -1;
 
         if (second_pushed && !third_pushed) {
-            char* key = new char[10];
+            string key, max_key, temp_max_key;
             int first, second;
             double temp_max = -INF;
             int temp_index = -1;
@@ -558,30 +552,36 @@ void DSMGA2::findClique(int startNode, list<int>& result) {
 
             for (DLLA::iterator iter = rest.begin(); iter != rest.end(); ++iter) {
                 if (*iter < first)
-                    sprintf(key, "%03d%03d%03d", *iter, first, second);
+                    key = to_string(*iter) + to_string(first) + to_string(second);
                 else if (*iter > first && *iter < second)
-                    sprintf(key, "%03d%03d%03d", first, *iter, second);
+                    key = to_string(first) + to_string(*iter) + to_string(second);
                 else
-                    sprintf(key, "%03d%03d%03d", first, second, *iter);
-                if (max < threeMI[key]) {
-                    max = threeMI[key];
+                    key = to_string(first) + to_string(second) + to_string(*iter);
+                //cout << predictMI3.size() << endl;
+                //cout << predictMI3[key] << endl;
+                if (max < predictMI3[key]) {
+                    max = predictMI3[key];
                     index = *iter;
+                    max_key = key;
                 }
                 if (temp_max < connection[*iter]) {
                     temp_max = connection[*iter];
                     temp_index = *iter;
+                    temp_max_key = key;
                 }
             }
 
-            cout << "ThreeMI Index: " << index << endl;
-            cout << "AddMI Index: " << temp_index << endl;
+            //cout << "ThreeMI Index: " << index << endl;
+            //cout << "AddMI Index: " << temp_index << endl;
 
             if (index != temp_index) {
-                cout << "ThreeMI!" << endl;
+                //cout << "ThreeMI!" << endl;
+                double diff_add = connection[temp_index] - connection[index];
+                double diff_mi3 = predictMI3[max_key] - predictMI3[temp_max_key];
+                //cout << "diff " << diff_add << " " << diff_mi3 << endl;
             }
 
             third_pushed = true;
-            delete [] key;
         } else {
             for (DLLA::iterator iter = rest.begin(); iter != rest.end(); ++iter) {
                 if (max < connection[*iter]) {
@@ -715,21 +715,21 @@ double DSMGA2::compute_three_mi_predict(vector<double> p) {
     low[6] = max(max(p2[3] - high[7] , p2[6] - high[4]) , p2[10] - high[2]); //110
     low[7] = max(max(p2[3] - high[6] , p2[7] - high[5]) , p2[11] - high[3]); //111
 
-    bool ppp = false;
+    //bool ppp = false;
     for (int i = 0; i < 8; ++i) {
-        if (high[i] < p[i]) {
-            cout << "high error in index " << i << endl;
-            ppp = true;
-        }
-        if (low[i] > p[i]) {
-            cout << "low error in index " << i << endl;
-            ppp = true;
-        }
+        //if (high[i] < p[i]) {
+            //cout << "high error in index " << i << endl;
+            //ppp = true;
+        //}
+        //if (low[i] > p[i]) {
+            //cout << "low error in index " << i << endl;
+            //ppp = true;
+        //}
         predict[i] = (high[i] + low[i]) / 2;
     }
-    if (ppp)
-        for (int j = 0; j < 8; ++j)
-            cout << p[j] << endl;
+    //if (ppp)
+        //for (int j = 0; j < 8; ++j)
+            //cout << p[j] << endl;
 
     return compute_three_mi(predict);     
 }

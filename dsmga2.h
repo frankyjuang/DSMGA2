@@ -9,6 +9,7 @@
 #define _DSMGA2_H_
 
 #include <list>
+#include <string>
 #include "chromosome.h"
 #include "statistics.h"
 #include "trimatrix.h"
@@ -75,7 +76,7 @@ public:
     FastCounting* fastCounting;
 
     TriMatrix<double> graph;
-    unordered_map<char*, double> threeMI;
+    unordered_map<string, double> predictMI3;
 
     double previousFitnessMean;
     Statistics stFitness;
