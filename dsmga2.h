@@ -31,7 +31,7 @@ public:
     void buildGraph ();
     void mixing ();
     void restrictedMixing(Chromosome&);
-    bool restrictedMixing(Chromosome& ch, list<int>& mask);
+    bool restrictedMixing(Chromosome& ch, list<int>& mask, vector<size_t>& dRank);
     void backMixing(Chromosome& source, list<int>& mask, Chromosome& des);
     void backMixingE(Chromosome& source, list<int>& mask, Chromosome& des);
 
@@ -61,6 +61,7 @@ public:
 
 
     list<int> *masks;
+    vector<size_t> *dRanks;
     int *selectionIndex;
     int *orderN;                             // for random order
     int *orderELL;                             // for random order
@@ -81,10 +82,9 @@ public:
 
     // methods
     double computeMI(double, double, double, double) const;
-    double computeKAI(double, double, double, double) const;
 
 
-    void findClique(int startNode, list<int>& result);
+    void findClique(int startNode, list<int>& result, vector<size_t>& dRank_indices);
 
     void buildFastCounting();
     int countXOR(int, int) const;

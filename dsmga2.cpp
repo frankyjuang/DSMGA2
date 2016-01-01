@@ -9,6 +9,7 @@
 #include <iterator>
 
 #include <iostream>
+#include <numeric>
 #include "chromosome.h"
 #include "dsmga2.h"
 #include "fastcounting.h"
@@ -41,6 +42,7 @@ DSMGA2::DSMGA2 (int n_ell, int n_nInitial, int n_maxGen, int n_maxFe, int fffff)
 
     bestIndex = -1;
     masks = new list<int>[ell];
+    dRanks = new vector<size_t>[ell];
     selectionIndex = new int[nCurrent];
     orderN = new int[nCurrent];
     orderELL = new int[ell];
@@ -67,6 +69,7 @@ DSMGA2::DSMGA2 (int n_ell, int n_nInitial, int n_maxGen, int n_maxFe, int fffff)
 
 DSMGA2::~DSMGA2 () {
     delete []masks;
+    delete []dRanks;
     delete []orderN;
     delete []orderELL;
     delete []selectionIndex;
@@ -228,6 +231,7 @@ void DSMGA2::restrictedMixing(Chromosome& ch) {
     int r = myRand.uniformInt(0, ell-1);
 
     list<int> mask = masks[r];
+    vector<size_t> dRank = dRanks[r];
 
     size_t size = findSize(ch, mask);       // return longest available mask length
     if (size > (size_t)ell/2)
@@ -238,7 +242,7 @@ void DSMGA2::restrictedMixing(Chromosome& ch) {
         mask.pop_back();
 
 
-    bool taken = restrictedMixing(ch, mask);
+    bool taken = restrictedMixing(ch, mask, dRank);
 
     EQ = true;
     if (taken) {
@@ -298,12 +302,19 @@ void DSMGA2::backMixingE(Chromosome& source, list<int>& mask, Chromosome& des) {
 
 }
 
-bool DSMGA2::restrictedMixing(Chromosome& ch, list<int>& mask) {
+bool DSMGA2::restrictedMixing(Chromosome& ch, list<int>& mask, vector<size_t>& dRank) {
 
     bool taken = false;
     size_t lastUB = 0;
 
-    for (size_t ub = 1; ub <= mask.size(); ++ub) {
+    if (mask.size() == 0)
+        return taken;
+
+    for (size_t ub : dRank) {
+
+        if (++ub > mask.size())
+            continue;
+        //cout << ub << " ";
 
         size_t size = 1;
         Chromosome trial(ell);
@@ -333,6 +344,8 @@ bool DSMGA2::restrictedMixing(Chromosome& ch, list<int>& mask) {
             break;
         }
     }
+    //if (mask.size() != 0)
+        //cout << endl;
 
     if (lastUB != 0) {
         while (mask.size() > lastUB)
@@ -392,8 +405,8 @@ void DSMGA2::mixing() {
     buildFastCounting();
     buildGraph();
     // ================================================
-    for (int i=0; i<ell; ++i) {
-        findClique(i, masks[i]);        // generate connection priority for each bit
+    for (int i = 0; i < ell; ++i) {
+        findClique(i, masks[i], dRanks[i]);        // generate connection priority for each bit
     }
 
     int repeat = (ell>50)? ell/50: 1;
@@ -460,7 +473,7 @@ void DSMGA2::buildGraph() {
 }
 
 // from 1 to ell, pick by max edge
-void DSMGA2::findClique(int startNode, list<int>& result) {
+void DSMGA2::findClique(int startNode, list<int>& result, vector<size_t>& dRank_indices) {
 
 
     result.clear();
@@ -479,24 +492,37 @@ void DSMGA2::findClique(int startNode, list<int>& result) {
     for (DLLA::iterator iter = rest.begin(); iter != rest.end(); ++iter)
         connection[*iter] = graph(startNode, *iter);
 
+    vector<double> diff;
+    diff.reserve(ell);
+    diff.push_back(INF);
+    dRank_indices.resize(ell);
+    iota(dRank_indices.begin(), dRank_indices.end(), static_cast<size_t>(0));
+
     while (!rest.isEmpty()) {
 
-        double max = -INF;
-        int index = -1;
+        double first = -INF;
+        double second = -INF;
+        int first_idx = -1;
+
         for (DLLA::iterator iter = rest.begin(); iter != rest.end(); ++iter) {
-            if (max < connection[*iter]) {
-                max = connection[*iter];
-                index = *iter;
+            if (first < connection[*iter]) {
+                first = connection[*iter];
+                first_idx = *iter;
+            } else if (second < connection[*iter]) {
+                second = connection[*iter];
             }
         }
 
-        rest.erase(index);
-        result.push_back(index);
+        diff.push_back((first - second) / (int)(diff.size()+1));
+
+        rest.erase(first_idx);
+        result.push_back(first_idx);
 
         for (DLLA::iterator iter = rest.begin(); iter != rest.end(); ++iter)
-            connection[*iter] += graph(index, *iter);
+            connection[*iter] += graph(first_idx, *iter);
     }
 
+    sort(dRank_indices.begin(), dRank_indices.end(), [&](size_t a, size_t b) { return diff[a] > diff[b]; });
 
     delete []connection;
 
