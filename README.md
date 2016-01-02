@@ -18,11 +18,15 @@ Replace mutual information with chi-square test.
 ### optBM
 Prevent rare populations from disappearing during backmixing.
 
+### dRank
+When finding clique, sort by the difference between first place (itself) and second place.
+
 ## Experiment
 
-- kai_100_3: kai, ell-100, step-3
-- master_100_3: mi, ell-100, step-3
-- optBM_100_3: optBM, ell-100, step-3
+### nk
+- mode_ell_step
 - optBM_100_3_fixed_1: optBM, ell-100, step-3, threshold set to 1
 - optBM_1_100_3: optBM, threshold set to one standard deviation, ell-100, step-3
-- simple_100_3: simple, ell-100, step-3
+
+### others
+- mode_prob_ell
