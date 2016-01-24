@@ -475,7 +475,6 @@ void DSMGA2::buildGraph() {
 // from 1 to ell, pick by max edge
 void DSMGA2::findClique(int startNode, list<int>& result, vector<size_t>& dRank_indices) {
 
-
     result.clear();
 
     DLLA rest(ell);         // why using DOUBLE link list instead of linked list or just vector
@@ -506,6 +505,7 @@ void DSMGA2::findClique(int startNode, list<int>& result, vector<size_t>& dRank_
 
         for (DLLA::iterator iter = rest.begin(); iter != rest.end(); ++iter) {
             if (first < connection[*iter]) {
+                second = first;
                 first = connection[*iter];
                 first_idx = *iter;
             } else if (second < connection[*iter]) {
@@ -513,7 +513,7 @@ void DSMGA2::findClique(int startNode, list<int>& result, vector<size_t>& dRank_
             }
         }
 
-        diff.push_back((first - second) / (int)(diff.size()+1));
+        diff.push_back((first - second) / (int)diff.size());
 
         rest.erase(first_idx);
         result.push_back(first_idx);
