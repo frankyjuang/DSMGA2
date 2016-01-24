@@ -239,7 +239,7 @@ void DSMGA2::restrictedMixing(Chromosome& ch) {
         mask.pop_back();
 
     RM = true;
-    bool taken = restrictedMixing(ch, mask, dRank);
+    bool taken = restrictedMixing(ch, mask);
     RM = false;
 
     EQ = true;
