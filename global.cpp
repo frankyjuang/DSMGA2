@@ -20,10 +20,12 @@ bool GHC = true;
 bool SELECTION = true;
 bool CACHE = false;
 bool SHOW_BISECTION = true;
+bool RM = false;
 
 char outputFilename[100];
 Chromosome::Function Chromosome::function;
 int Chromosome::nfe;
+int Chromosome::rmnfe;
 int Chromosome::lsnfe;
 int Chromosome::hitnfe;
 bool Chromosome::hit;

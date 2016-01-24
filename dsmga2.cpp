@@ -29,6 +29,7 @@ DSMGA2::DSMGA2 (int n_ell, int n_nInitial, int n_maxGen, int n_maxFe, int fffff)
 
     Chromosome::function = (Chromosome::Function)fffff;
     Chromosome::nfe = 0;            // number of function evaluation
+    Chromosome::rmnfe = 0;
     Chromosome::lsnfe = 0;
     Chromosome::hitnfe = 0;
     Chromosome::hit = false;
@@ -237,8 +238,9 @@ void DSMGA2::restrictedMixing(Chromosome& ch) {
     while (mask.size() > size)
         mask.pop_back();
 
-
-    bool taken = restrictedMixing(ch, mask);
+    RM = true;
+    bool taken = restrictedMixing(ch, mask, dRank);
+    RM = false;
 
     EQ = true;
     if (taken) {

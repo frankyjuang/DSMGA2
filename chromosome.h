@@ -123,6 +123,7 @@ public:
 
 public:
     static int nfe;
+    static int rmnfe;
     static int lsnfe;
     static int hitnfe;
     static bool hit;
