@@ -106,12 +106,14 @@ bool Chromosome::hasSeen() const {
 
 double Chromosome::evaluate () {
 
-
     if (CACHE)
         if (hasSeen()) {
             evaluated = true;
             return cache[key];
         }
+
+    if (RM)
+        ++rmnfe;
 
     ++nfe;
     evaluated = true;

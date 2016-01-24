@@ -75,7 +75,7 @@ main (int argc, char *argv[]) {
 
     int i;
 
-    Statistics stGen, stFE, stLSFE;
+    Statistics stGen, stFE, stLSFE, stRMFE;
     int usedGen;
 
     int failNum = 0;
@@ -97,6 +97,7 @@ main (int argc, char *argv[]) {
         } else {
             stFE.record (Chromosome::hitnfe);
             stLSFE.record (Chromosome::lsnfe);
+            stRMFE.record (Chromosome::rmnfe);
             stGen.record (usedGen);
             printf ("+");
         }
@@ -107,7 +108,7 @@ main (int argc, char *argv[]) {
 
     cout << endl;
     printf ("\n");
-    printf ("%f  %f  %f %d\n", stGen.getMean (), stFE.getMean(), stLSFE.getMean(), failNum);
+    printf ("%f  %f  %f %f %d\n", stGen.getMean (), stFE.getMean(), stRMFE.getMean(), stLSFE.getMean(), failNum);
 
     if (fffff == 4) freeNKWAProblem(&nkwa);
 

@@ -20,6 +20,8 @@ using namespace std;
 struct Record {
     int n;
     double nfe;
+    double lsnfe;
+    double rmnfe;
     double gen;
 };
 
@@ -72,7 +74,7 @@ int main (int argc, char *argv[]) {
 
     Statistics st;
 
-    Statistics stGen, stLS, stNFE;
+    Statistics stGen, stLS, stNFE, stRMFE;
 
 
     if (fffff == 5) {
@@ -120,6 +122,7 @@ int main (int argc, char *argv[]) {
         stGen.reset();
         stNFE.reset();
         stLS.reset();
+        stRMFE.reset();
 
         for (int j=0; j<numConvergence; j++) {
 
@@ -129,6 +132,7 @@ int main (int argc, char *argv[]) {
             stGen.record(ga.getGeneration());
             stNFE.record(Chromosome::hitnfe);
             stLS.record(Chromosome::lsnfe);
+            stRMFE.record(Chromosome::rmnfe);
 
 
             if (!ga.foundOptima()) {
@@ -151,10 +155,15 @@ int main (int argc, char *argv[]) {
 
         rec[i].gen = stGen.getMean();
 
-        if (!foundOptima)
+        if (!foundOptima) {
             rec[i].nfe = INF;
-        else
+            rec[i].lsnfe = INF;
+            rec[i].rmnfe = INF;
+        } else {
             rec[i].nfe = stNFE.getMean();
+            rec[i].lsnfe = stLS.getMean();
+            rec[i].rmnfe = stRMFE.getMean();
+        }
 
         if (SHOW_BISECTION) printf(" : %f \n", rec[i].nfe);
 
@@ -177,6 +186,7 @@ int main (int argc, char *argv[]) {
             stGen.record(ga.getGeneration());
             stNFE.record(Chromosome::hitnfe);
             stLS.record(Chromosome::lsnfe);
+            stRMFE.record(Chromosome::rmnfe);
 
 
             if (!ga.foundOptima()) {
@@ -199,10 +209,15 @@ int main (int argc, char *argv[]) {
 
         rec[1].gen = stGen.getMean();
 
-        if (!foundOptima)
+        if (!foundOptima) {
             rec[1].nfe = INF;
-        else
+            rec[1].lsnfe = INF;
+            rec[1].rmnfe = INF;
+        } else {
             rec[1].nfe = stNFE.getMean();
+            rec[1].lsnfe = stLS.getMean();
+            rec[1].rmnfe = stRMFE.getMean();
+        }
 
         if (SHOW_BISECTION) printf(" : %f \n", rec[1].nfe);
 
@@ -220,6 +235,7 @@ int main (int argc, char *argv[]) {
         stGen.reset();
         stNFE.reset();
         stLS.reset();
+        stRMFE.reset();
 
         for (int j=0; j<numConvergence; j++) {
 
@@ -229,6 +245,7 @@ int main (int argc, char *argv[]) {
             stGen.record(ga.getGeneration());
             stNFE.record(Chromosome::hitnfe);
             stLS.record(Chromosome::lsnfe);
+            stRMFE.record(Chromosome::rmnfe);
 
 
             if (!ga.foundOptima()) {
@@ -254,10 +271,15 @@ int main (int argc, char *argv[]) {
         rec[2].n = popu;
         rec[2].gen = stGen.getMean();
 
-        if (!foundOptima)
+        if (!foundOptima) {
             rec[2].nfe = INF;
-        else
+            rec[2].lsnfe = INF;
+            rec[2].rmnfe = INF;
+        } else {
             rec[2].nfe = stNFE.getMean();
+            rec[2].lsnfe = stLS.getMean();
+            rec[2].rmnfe = stRMFE.getMean();
+        }
 
         if (SHOW_BISECTION) printf(" : %f \n", rec[2].nfe);
 
@@ -295,17 +317,24 @@ int main (int argc, char *argv[]) {
                 stGen.reset();
                 stLS.reset();
                 stNFE.reset();
+                stRMFE.reset();
             }
             stGen.record(ga.getGeneration());
             stNFE.record(Chromosome::hitnfe);
             stLS.record(Chromosome::lsnfe);
+            stRMFE.record(Chromosome::rmnfe);
         }
 
         q1.gen = stGen.getMean();
-        if (foundOptima)
+        if (foundOptima) {
             q1.nfe = stNFE.getMean();
-        else
+            q1.lsnfe = stLS.getMean();
+            q1.rmnfe = stRMFE.getMean();
+        } else {
             q1.nfe = INF;
+            q1.lsnfe = INF;
+            q1.rmnfe = INF;
+        }
 
 
         if (SHOW_BISECTION) printf(" : %f \n", q1.nfe);
@@ -338,17 +367,24 @@ int main (int argc, char *argv[]) {
                 stGen.reset();
                 stLS.reset();
                 stNFE.reset();
+                stRMFE.reset();
             }
             stGen.record(ga.getGeneration());
             stNFE.record(Chromosome::hitnfe);
             stLS.record(Chromosome::lsnfe);
+            stRMFE.record(Chromosome::rmnfe);
         }
 
         q3.gen = stGen.getMean();
         if (foundOptima) {
             q3.nfe = stNFE.getMean();
-        } else
+            q3.lsnfe = stLS.getMean();
+            q3.rmnfe = stRMFE.getMean();
+        } else {
             q3.nfe = INF;
+            q3.lsnfe = INF;
+            q3.rmnfe = INF;
+        }
 
         if (SHOW_BISECTION) printf(" : %f \n", q3.nfe);
 
@@ -362,7 +398,7 @@ int main (int argc, char *argv[]) {
             rec[0] = rec[1];
             rec[1] = q3;
         }
-    };
+    }
 
 
 
@@ -372,6 +408,8 @@ int main (int argc, char *argv[]) {
     printf("population: %d\n", rec[1].n);
     printf("generation: %f\n", rec[1].gen);
     printf("NFE: %f\n", rec[1].nfe);
+    printf("LSNFE: %f\n", rec[1].lsnfe);
+    printf("RMNFE: %f\n", rec[1].rmnfe);
 
 
     return EXIT_SUCCESS;

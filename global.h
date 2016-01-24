@@ -26,6 +26,7 @@ extern bool GHC;
 extern bool SELECTION;
 extern bool CACHE;
 extern bool SHOW_BISECTION;
+extern bool RM;
 
 extern char outputFilename[100];
 extern void gstop ();

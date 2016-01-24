@@ -30,6 +30,7 @@ DSMGA2::DSMGA2 (int n_ell, int n_nInitial, int n_maxGen, int n_maxFe, int fffff)
 
     Chromosome::function = (Chromosome::Function)fffff;
     Chromosome::nfe = 0;            // number of function evaluation
+    Chromosome::rmnfe = 0;
     Chromosome::lsnfe = 0;
     Chromosome::hitnfe = 0;
     Chromosome::hit = false;
@@ -241,8 +242,9 @@ void DSMGA2::restrictedMixing(Chromosome& ch) {
     while (mask.size() > size)
         mask.pop_back();
 
-
+    RM = true;
     bool taken = restrictedMixing(ch, mask, dRank);
+    RM = false;
 
     EQ = true;
     if (taken) {
@@ -513,7 +515,7 @@ void DSMGA2::findClique(int startNode, list<int>& result, vector<size_t>& dRank_
             }
         }
 
-        diff.push_back((first - second) / (int)diff.size());
+        diff.push_back((first - second) / (int)diff.size());    // delta_n / n-1
 
         rest.erase(first_idx);
         result.push_back(first_idx);
