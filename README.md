@@ -21,6 +21,12 @@ Prevent rare populations from disappearing during backmixing.
 ### dRank
 When finding clique, sort by the difference between first place (itself) and second place.
 
+### dRankMix
+dRank weights between original ranking.
+
+### dRank4
+dRank with four edges.
+
 ## Experiment
 
 ### nk
@@ -30,3 +36,6 @@ When finding clique, sort by the difference between first place (itself) and sec
 
 ### others
 - mode_prob_ell
+
+## 104-1 Final Presentation
+- [slide](http://slides.com/frankyjuang/dsmga2/fullscreen)
